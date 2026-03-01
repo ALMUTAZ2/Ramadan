@@ -894,15 +894,16 @@ function checkQuizTimeStatus() {
 
         // حفظ النتيجة في scores
         const playerData = {
-          playerName: gameState.playerName,
-          playerPhone: gameState.playerPhone || '',
-          deviceId: gameState.deviceId,
-          score: gameState.score,
-          totalTime: gameState.totalTime,
-          participationDate: getTodayFormatted(),
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          matchId: gameState.matchId || null
-        };
+  playerName: gameState.playerName,
+  playerPhone: gameState.playerPhone || '', // ✅ مهم
+  deviceId: gameState.deviceId,
+  score: gameState.score,
+  totalTime: gameState.totalTime,
+  answers: gameState.answers,
+  participationDate: getTodayFormatted(),
+  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  matchId: gameState.matchId || null
+};
         await db.collection('scores').add(playerData);
 
         const btn = document.getElementById('show-results-button');
