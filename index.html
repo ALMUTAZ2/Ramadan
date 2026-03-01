@@ -499,7 +499,7 @@
     const QUIZ_MODE = "auto";
     const QUIZ_START_HOUR = 19;
     const QUIZ_START_MINUTE = 0;
-    const QUIZ_END_HOUR = 20;
+    const QUIZ_END_HOUR = 21;
     const QUIZ_END_MINUTE = 0;
 
     // ==========================
@@ -1028,23 +1028,40 @@ function checkQuizTimeStatus() {
         }
 
         // ✅ تعديل 2: اختيار 5 أسئلة عشوائية من بنك 25 (أو أكثر)
-        const originalQuestions = shuffleArray([...ramadanQuestions[questionDay]]).slice(0, 5);
-        const shuffledData = shuffleQuestions(originalQuestions);
+     // ===== توزيع ذكي للأسئلة حسب الجهاز =====
+function seededRandom(seed) {
+  let x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
 
-        gameState.questions = shuffledData.questions;
-        gameState.correctAnswers = shuffledData.correctAnswers;
+function getSeededQuestions(allQuestions, deviceId) {
+  // تحويل deviceId إلى رقم ثابت
+  const seed = deviceId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
 
-        elements.loadingScreen.classList.add('hidden');
-        elements.playerWelcome.textContent = `مرحباً ${gameState.playerName}!`;
+  // ترتيب ثابت لكن مختلف لكل جهاز
+  const shuffled = [...allQuestions].sort((a, b) =>
+    seededRandom(seed + a.question.length) - 0.5
+  );
 
-        startCountdown();
-      } catch (error) {
-        console.error('Error starting quiz:', error);
-        elements.loadingScreen.classList.add('hidden');
-        alert('حدث خطأ في بدء المسابقة. يرجى المحاولة مرة أخرى.');
-        elements.startScreen.classList.remove('hidden');
-      }
-    }
+  return shuffled.slice(0, 5);
+}
+
+// ===== استبدال السطر القديم =====
+const originalQuestions = getSeededQuestions(
+  ramadanQuestions[questionDay],
+  gameState.deviceId
+);
+
+const shuffledData = shuffleQuestions(originalQuestions);
+
+gameState.questions = shuffledData.questions;
+gameState.correctAnswers = shuffledData.correctAnswers;
+
+elements.loadingScreen.classList.add('hidden');
+elements.playerWelcome.textContent = `مرحباً ${gameState.playerName}!`;
+
+startCountdown();
+        
 
     // ✅ تفعيل زر البدء يعتمد على الاسم + رقم الجوال الصحيح
     function validatePlayerInputs() {
